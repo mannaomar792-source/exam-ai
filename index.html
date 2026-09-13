@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exam AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f4f6fb;color:#172033}
+.wrap{max-width:1050px;margin:auto;padding:24px 15px 55px}
+.hero{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-radius:24px;padding:28px;margin-bottom:16px}
+.hero h1{margin:0 0 8px;font-size:30px}.hero p{margin:0;line-height:1.8}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 8px 28px #0f172a0a}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.full{grid-column:1/-1}
+label{display:block;font-weight:700;margin-bottom:8px}
+input[type=file],select,input[type=number]{width:100%;padding:12px;border:1px solid #d0d5dd;border-radius:12px;background:#fff;font:inherit}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+button{border:0;border-radius:12px;padding:12px 17px;font:inherit;font-weight:700;cursor:pointer}
+.primary{background:#4f46e5;color:#fff}.secondary{background:#eef2ff;color:#3730a3}.ghost{background:#f2f4f7}
+.status{display:none;margin-top:11px;padding:11px 13px;border-radius:10px;background:#f8fafc;color:#475467;line-height:1.6}
+.show{display:block}
+#selectors{display:none}
+.select-note{font-size:13px;color:#667085;margin-top:6px}
+#exam{display:none}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:6px 10px;font-size:13px;font-weight:700}
+.q{border:1px solid #e5e7eb;border-radius:15px;padding:15px;margin:12px 0}.q h3{margin:0 0 10px;line-height:1.8;font-size:17px}
+.opt{display:flex;gap:9px;padding:9px;border-radius:9px}.opt:hover{background:#f8fafc}
+.result{display:none;margin-top:14px;padding:15px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:13px}
+.score{font-size:25px;font-weight:800;color:#15803d}.rv{padding:10px 0;border-top:1px solid #d1fae5;line-height:1.7}
+footer{text-align:center;color:#667085;font-size:13px;line-height:1.7}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="hero">
+<h1>📚 Exam AI</h1>
+<p>ارفع الكتاب، اختر <b>الوحدة</b> ثم <b>الدرس</b> بشكل مستقل، وحدد المستوى وعدد الأسئلة.</p>
+</section>
+
+<section class="card">
+<div class="grid">
+<div class="full">
+<label>1) كتاب المادة PDF</label>
+<input id="file" type="file" accept=".pdf,application/pdf">
+<div id="fileStatus" class="status"></div>
+</div>
+
+<div class="full" id="selectors">
+<div class="grid">
+<div>
+<label>2) الوحدة</label>
+<select id="unit">
+<option value="__ALL_UNITS__">📚 كل الوحدات</option>
+</select>
+<div class="select-note">اختيار وحدة يتيح لك بعد ذلك اختيار درس منها.</div>
+</div>
+<div>
+<label>3) الدرس</label>
+<select id="lesson" disabled>
+<option value="__ALL_LESSONS__">كل دروس الوحدة</option>
+</select>
+<div class="select-note">يمكنك تركه على "كل دروس الوحدة".</div>
+</div>
+</div>
+</div>
+
+<div>
+<label>4) مستوى الامتحان</label>
+<select id="level"><option value="easy">سهل</option><option value="medium" selected>متوسط</option><option value="hard">صعب</option></select>
+</div>
+<div>
+<label>5) عدد الأسئلة</label>
+<input id="count" type="number" min="1" max="50" value="10">
+</div>
+<div>
+<label>6) نوع الأسئلة</label>
+<select id="type"><option value="mcq">اختيار من متعدد</option><option value="tf">صح / خطأ</option><option value="mixed">مختلط</option></select>
+</div>
+<div>
+<label>7) نطاق سريع</label>
+<select id="scopeQuick">
+<option value="book">الكتاب كاملًا</option>
+<option value="unit">الوحدة المختارة</option>
+<option value="lesson">الدرس المختار</option>
+</select>
+</div>
+</div>
+
+<div class="actions">
+<button id="generate" class="primary">إنشاء الامتحان</button>
+<button id="reset" class="ghost">إعادة الاختيار</button>
+</div>
+<div id="genStatus" class="status"></div>
+</section>
+
+<section id="exam" class="card">
+<div class="top"><div><span id="meta" class="badge"></span><h2 id="title" style="margin:8px 0 0"></h2></div><button id="submit" class="primary">تصحيح الامتحان</button></div>
+<form id="questions"></form>
+<div id="result" class="result"><div id="score" class="score"></div><div id="line" style="margin-top:6px"></div><div id="review"></div></div>
+</section>
+
+<footer>يحتاج الموقع إلى Backend ومفتاح API على الخادم لتوليد الامتحانات بالذكاء الاصطناعي.</footer>
+</div>
+
+<script>
+let bookText='', structure={units:[]}, exam=null;
+const $=id=>document.getElementById(id);
+function st(id,msg,show=true){$(id).textContent=msg;$(id).classList.toggle('show',show)}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+$('file').addEventListener('change', async ()=>{
+ const f=$('file').files[0]; if(!f)return;
+ st('fileStatus','جاري تحليل الكتاب واستخراج الوحدات والدروس...');
+ const fd=new FormData();fd.append('book',f);
+ try{
+   const r=await fetch('/api/analyze-book',{method:'POST',body:fd});
+   const data=await r.json(); if(!r.ok)throw new Error(data.error||'خطأ');
+   bookText=data.bookText||'';structure={units:data.units||[]};
+   fillUnits();
+   $('selectors').style.display='block';
+   st('fileStatus',`تم تحليل الكتاب: ${structure.units.length} وحدة.`);
+ }catch(e){st('fileStatus',e.message)}
+});
+
+function fillUnits(){
+ const unit=$('unit');
+ unit.innerHTML='<option value="__ALL_UNITS__">📚 كل الوحدات</option>';
+ structure.units.forEach((u,i)=>{
+  const o=document.createElement('option');o.value=u.title;o.textContent=`${i+1}. ${u.title}`;unit.appendChild(o);
+ });
+ updateLessons();
+}
+function updateLessons(){
+ const unitTitle=$('unit').value;
+ const lesson=$('lesson');
+ lesson.innerHTML='<option value="__ALL_LESSONS__">كل دروس الوحدة</option>';
+ if(unitTitle==='__ALL_UNITS__'){
+   lesson.disabled=true;
+ }else{
+   const u=structure.units.find(x=>x.title===unitTitle);
+   (u?.lessons||[]).forEach((l,i)=>{
+     const o=document.createElement('option');o.value=l.title;o.textContent=`${i+1}. ${l.title}`;lesson.appendChild(o);
+   });
+   lesson.disabled=false;
+ }
+}
+$('unit').addEventListener('change',()=>{updateLessons();$('scopeQuick').value='unit'});
+$('lesson').addEventListener('change',()=>{$('scopeQuick').value='lesson'});
+$('scopeQuick').addEventListener('change',()=>{
+ const s=$('scopeQuick').value;
+ if(s==='book'){ $('unit').value='__ALL_UNITS__'; updateLessons(); }
+ if(s==='unit'){ if($('unit').value==='__ALL_UNITS__' && structure.units.length) $('unit').selectedIndex=1; updateLessons(); }
+ if(s==='lesson'){ if($('unit').value==='__ALL_UNITS__' && structure.units.length) $('unit').selectedIndex=1; updateLessons(); $('lesson').disabled=false; }
+});
+
+$('generate').addEventListener('click',async()=>{
+ if(!bookText){st('genStatus','ارفع الكتاب أولًا.');return}
+ const s=$('scopeQuick').value;
+ const unitTitle=$('unit').value;
+ const lessonTitle=s==='book'?'__ALL_LESSONS__':s==='unit'?'__ALL_LESSONS__':$('lesson').value;
+ const finalUnit=s==='book'?'__ALL_UNITS__':unitTitle;
+ if(s==='lesson' && lessonTitle==='__ALL_LESSONS__'){st('genStatus','اختر درسًا أولًا.');return}
+ if(s!=='book' && finalUnit==='__ALL_UNITS__'){st('genStatus','اختر الوحدة أولًا.');return}
+
+ st('genStatus','جاري إنشاء الامتحان حسب اختيارك...');
+ $('generate').disabled=true;
+ try{
+  const body={bookText,unitTitle:finalUnit,lessonTitle,level:$('level').value,count:Number($('count').value)||10,type:$('type').value};
+  const r=await fetch('/api/generate-exam',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await r.json();if(!r.ok)throw new Error(data.error||'خطأ');
+  exam=data;renderExam(data);st('genStatus','تم إنشاء الامتحان.');
+ }catch(e){st('genStatus',e.message)}
+ $('generate').disabled=false;
+});
+
+function renderExam(data){
+ $('exam').style.display='block';$('title').textContent=data.title||'امتحان المادة';$('meta').textContent=`${data.questions.length} سؤال`;
+ let out='';
+ data.questions.forEach((q,i)=>{
+  const opts=q.type==='tf'?['صح','خطأ']:(q.options||[]);
+  out+=`<div class="q"><h3>${i+1}) ${esc(q.question)}</h3>`;
+  opts.forEach(o=>out+=`<label class="opt"><input type="radio" name="q${i}" value="${esc(o)}"><span>${esc(o)}</span></label>`);
+  out+='</div>';
+ });
+ $('questions').innerHTML=out;$('result').style.display='none';$('exam').scrollIntoView({behavior:'smooth'});
+}
+$('submit').addEventListener('click',()=>{
+ let score=0,answered=0,review='';
+ exam.questions.forEach((q,i)=>{
+  const el=document.querySelector(`input[name="q${i}"]:checked`),u=el?.value||'';
+  if(u)answered++;const ok=u===q.answer;if(ok)score++;
+  review+=`<div class="rv"><b>السؤال ${i+1}:</b> ${ok?'✅ صحيح':'❌ خطأ'}<br>الإجابة الصحيحة: <b>${esc(q.answer)}</b><br>${esc(q.explanation||'')}</div>`;
+ });
+ const pct=Math.round(score/exam.questions.length*100);
+ $('score').textContent=`${score}/${exam.questions.length} — ${pct}%`;$('line').textContent=`أجبت عن ${answered} سؤالًا.`;
+ $('review').innerHTML=review;$('result').style.display='block';$('result').scrollIntoView({behavior:'smooth'});
+});
+$('reset').addEventListener('click',()=>{
+ $('unit').value='__ALL_UNITS__';updateLessons();$('scopeQuick').value='book';$('level').value='medium';$('count').value=10;$('type').value='mcq';$('genStatus').classList.remove('show');
+});
+</script>
+</body>
+</html>
